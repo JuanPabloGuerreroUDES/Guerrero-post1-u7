@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Productos</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2rem;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #065A82;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f5f5f5;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .btn-edit {
+            background: #1C7293;
+            color: white;
+        }
+
+        .btn-del {
+            background: #C62828;
+            color: white;
+        }
+
+        .btn-new {
+            background: #2E7D32;
+            color: white;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Gestión de Productos</h1>
+
+<a th:href="@{/productos/nuevo}" class="btn btn-new">
+    + Nuevo Producto
+</a>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Descripción</th>
+        <th>Precio</th>
+        <th>Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+
+    <tr th:each="p : ${productos}">
+        <td th:text="${p.id}"></td>
+        <td th:text="${p.nombre}"></td>
+        <td th:text="${p.descripcion}"></td>
+        <td th:text="${'$' + #numbers.formatDecimal(p.precio,1,2)}"></td>
+        <td>
+            <a th:href="@{/productos/editar/{id}(id=${p.id})}" class="btn btn-edit">
+                Editar
+            </a>
+
+            <a th:href="@{/productos/eliminar/{id}(id=${p.id})}"
+               class="btn btn-del"
+               onclick="return confirm('¿Eliminar este producto?')">
+                Eliminar
+            </a>
+        </td>
+    </tr>
+
+    <tr th:if="${#lists.isEmpty(productos)}">
+        <td colspan="5" style="text-align:center">
+            No hay productos registrados.
+        </td>
+    </tr>
+
+    </tbody>
+</table>
+
+</body>
+</html>

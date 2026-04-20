@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title th:text="${accion} + ' Producto'">Producto</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2rem;
+        }
+
+        label {
+            display: block;
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            margin-top: 4px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            margin-top: 1rem;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            background: #065A82;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .btn-cancel {
+            background: #808080;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1 th:text="${accion} + ' Producto'">Producto</h1>
+
+<form th:action="@{/productos/guardar}" th:object="${producto}" method="post">
+
+    <!-- Campo oculto para el ID (necesario en edición) -->
+    <input type="hidden" th:field="*{id}">
+
+    <!-- Nombre -->
+    <label for="nombre">Nombre:</label>
+    <input type="text" id="nombre" th:field="*{nombre}" required>
+
+    <!-- Descripción -->
+    <label for="descripcion">Descripción:</label>
+    <textarea id="descripcion" th:field="*{descripcion}" rows="3"></textarea>
+
+    <!-- Precio -->
+    <label for="precio">Precio ($):</label>
+    <input type="number" id="precio" th:field="*{precio}" step="0.01" min="0" required>
+
+    <!-- Botones -->
+    <br>
+
+    <button type="submit" class="btn btn-save"
+            th:text="${accion} + ' Producto'">
+        Guardar
+    </button>
+
+    <a th:href="@{/productos}" class="btn btn-cancel">
+        Cancelar
+    </a>
+
+</form>
+
+</body>
+</html>
