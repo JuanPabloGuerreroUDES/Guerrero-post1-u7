@@ -1,9 +1,14 @@
 package com.example.multas.service;
 
+import com.example.multas.domain.PagoRechazadoException;
+import com.example.multas.domain.ResultadoPago;
+import com.example.multas.domain.SolicitudPago;
+import com.example.multas.domain.port.PasarelaPagoPort;
 import com.example.multas.model.EstadoMulta;
 import com.example.multas.model.LimiteMultasPendientesException;
 import com.example.multas.model.Multa;
 import com.example.multas.model.MultaNotFoundException;
+import com.example.multas.model.MultaYaPagadaException;
 import com.example.multas.repository.MultaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +22,11 @@ public class MultaService {
     private static final int LIMITE_MULTAS_PENDIENTES = 3;
 
     private final MultaRepository multaRepository;
+    private final PasarelaPagoPort pasarelaPagoPort; // única pasarela activa, no sabe cuál es
 
-    public MultaService(MultaRepository multaRepository) {
+    public MultaService(MultaRepository multaRepository, PasarelaPagoPort pasarelaPagoPort) {
         this.multaRepository = multaRepository;
+        this.pasarelaPagoPort = pasarelaPagoPort;
     }
 
     @Transactional(readOnly = true)
@@ -60,6 +67,21 @@ public class MultaService {
     public Multa pagarEnVentanilla(Long id) {
         Multa multa = buscarPorId(id);
         multa.marcarComoPagada("VENTANILLA");
+        return multaRepository.save(multa);
+    }
+
+    public Multa pagarConPasarela(Long id) {
+        Multa multa = buscarPorId(id);
+        // Se valida antes de llamar a la pasarela para no cobrar dos veces la misma multa
+        if (multa.getEstado() == EstadoMulta.PAGADA) {
+            throw new MultaYaPagadaException("La multa " + id + " ya fue pagada el " + multa.getFechaPago());
+        }
+        SolicitudPago solicitud = new SolicitudPago(multa.getId(), multa.getEstudianteId(), multa.getMonto());
+        ResultadoPago resultado = pasarelaPagoPort.procesar(solicitud);
+        if (!resultado.exitoso()) {
+            throw new PagoRechazadoException(resultado.mensaje());
+        }
+        multa.marcarComoPagada(resultado.proveedor());
         return multaRepository.save(multa);
     }
 }
